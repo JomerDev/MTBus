@@ -6,7 +6,7 @@ use embassy_rp::{
         Common, Config, FifoJoin, Instance, PioPin, ShiftConfig, ShiftDirection,
         StateMachine, Pio, InterruptHandler,
     },
-    Peripheral, PeripheralRef, gpio::{Output, Level, AnyPin}, Peripherals, bind_interrupts, peripherals::PIO0,
+    Peripheral, PeripheralRef, gpio::{Output, Level, AnyPin}, Peripherals, bind_interrupts, peripherals::{PIO0, PIN_11, PIN_12, PIN_16, PIN_17, PIN_25, DMA_CH0},
 };
 use embassy_sync::{blocking_mutex::raw::ThreadModeRawMutex, signal::Signal};
 use embassy_time::Timer;
@@ -196,22 +196,28 @@ struct Pins([Output<'static, AnyPin>; 3]);
 
 #[embassy_executor::task]
 pub async fn led_runner(
-    p: Peripherals
+    p11: PIN_11,
+    p12: PIN_12,
+    p16: PIN_16,
+    p17: PIN_17,
+    p25: PIN_25,
+    pio0: PIO0,
+    dma_ch0: DMA_CH0,
 ) {
 
-    let _pow = Output::new(p.PIN_11, Level::High);
+    let _pow = Output::new(p11, Level::High);
 
-    let Pio { mut common, sm0, .. } = Pio::new(p.PIO0, Irqs);
+    let Pio { mut common, sm0, .. } = Pio::new(pio0, Irqs);
 
     const NUM_LEDS: usize = 1;
     let mut rgb_data = [RGB8::default(); NUM_LEDS];
     let rgb_data_off = [RGB8::default(); NUM_LEDS];
 
-    let mut ws = Ws2812::new(&mut common, sm0, p.DMA_CH0, p.PIN_12);
+    let mut ws = Ws2812::new(&mut common, sm0, dma_ch0, p12);
 
-    let led_green = Output::new(AnyPin::from(p.PIN_16), Level::Low); // PIN_16: User Led Green
-    let led_red = Output::new(AnyPin::from(p.PIN_17), Level::Low); // PIN_17: User Led Red
-    let led_blue = Output::new(AnyPin::from(p.PIN_25), Level::Low); // PIN_25: User Led Blue
+    let led_green = Output::new(AnyPin::from(p16), Level::Low); // PIN_16: User Led Green
+    let led_red = Output::new(AnyPin::from(p17), Level::Low); // PIN_17: User Led Red
+    let led_blue = Output::new(AnyPin::from(p25), Level::Low); // PIN_25: User Led Blue
 
     let mut pins = Pins([led_red, led_green, led_blue]);
 
