@@ -1,0 +1,101 @@
+[package]
+name = "mtbus-controller"
+version = "0.1.0"
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+cortex-m = { version = "0.7.6", features = ["inline-asm"] }
+cortex-m-rt = "0.7.0"
+
+defmt = "0.3"
+defmt-rtt = "0.4"
+panic-probe = { version = "0.3", features = ["print-defmt"] }
+
+embassy-embedded-hal = { version = "0.1.0", features = ["defmt"] }
+
+embassy-executor = { version = "0.5.0", features = ["arch-cortex-m", "executor-thread", "executor-interrupt", "defmt", "integrated-timers", "task-arena-size-32768"] }
+embassy-futures = { version = "0.1.0" }
+embassy-sync = { version = "0.5.0", features = ["defmt"] }
+embassy-time = { version = "0.3.0", features = ["defmt", "defmt-timestamp-uptime"] }
+
+embassy-rp = { version = "0.1.0", features = ["defmt", "unstable-pac", "time-driver", "critical-section-impl"] }
+## need these for pio
+pio-proc = "0.2.2"
+pio = "0.2.1"
+## USB + logging via USB support (note: embassy-usb-logger requires portable-atomic with critical-section feature enabled)
+embassy-usb-driver = { version = "0.1.0", features = ["defmt"] }
+embassy-usb-logger = { version = "0.1.0" }
+portable-atomic = { version = "1.5.1", features = ["critical-section"] }
+log = "0.4"
+## network support
+embassy-net = { version = "0.4.0", features = ["defmt", "tcp", "udp", "dhcpv4", "medium-ethernet"] }
+# wiznet ethernet driver support
+embassy-net-wiznet = { version = "0.1.0", features = ["defmt"] }
+## pico-w support
+cyw43 = { version = "0.1.0", features = ["defmt", "firmware-logs"] }
+cyw43-pio = { version = "0.1.0", features = ["defmt", "overclock"] }
+static_cell = { version = "2"}
+
+mtbus-shared = { path = "../mtbus-shared" }
+erdnuss-comms = { git = "https://github.com/JomerDev/erdnuss-pub", rev = "6bda511c60b8d41bd81a981d21c43e91ceab6312" }
+
+erdnuss-rp2040 = { git = "https://github.com/JomerDev/erdnuss-pub", rev = "6bda511c60b8d41bd81a981d21c43e91ceab6312" }
+
+# [patch.crates-io]
+# embassy-usb-logger = { git = "https://github.com/embassy-rs/embassy", rev = "8b36a32ed5d834b23e970d5b723dd7df1f1c94a2" }
+# embassy-sync = { git = "https://github.com/embassy-rs/embassy", rev = "8b36a32ed5d834b23e970d5b723dd7df1f1c94a2" }
+
+
+# # cargo build/run
+# [profile.dev]
+# codegen-units = 1
+# debug = 2
+# debug-assertions = true
+# incremental = false
+# opt-level = 's'
+# overflow-checks = true
+
+# # cargo build/run --release
+# [profile.release]
+# codegen-units = 1
+# debug = 2
+# debug-assertions = false
+# incremental = false
+# lto = 'fat'
+# opt-level = 's'
+# overflow-checks = false
+
+# # do not optimize proc-macro crates = faster builds from scratch
+# [profile.dev.build-override]
+# codegen-units = 8
+# debug = false
+# debug-assertions = false
+# opt-level = 0
+# overflow-checks = false
+
+# [profile.release.build-override]
+# codegen-units = 8
+# debug = false
+# debug-assertions = false
+# opt-level = 0
+# overflow-checks = false
+
+# # cargo test
+# [profile.test]
+# codegen-units = 1
+# debug = 2
+# debug-assertions = true
+# incremental = false
+# opt-level = 's'
+# overflow-checks = true
+
+# # cargo test --release
+# [profile.bench]
+# codegen-units = 1
+# debug = 2
+# debug-assertions = false
+# incremental = false
+# lto = 'fat'
+# opt-level = 's'

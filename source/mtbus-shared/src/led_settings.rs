@@ -6,7 +6,7 @@ use embassy_rp::{
         Common, Config, FifoJoin, Instance, PioPin, ShiftConfig, ShiftDirection,
         StateMachine, Pio, InterruptHandler,
     },
-    Peripheral, PeripheralRef, gpio::{Output, Level, AnyPin}, Peripherals, bind_interrupts, peripherals::{PIO0, PIN_11, PIN_12, PIN_16, PIN_17, PIN_25, DMA_CH0},
+    Peripheral, PeripheralRef, gpio::{Output, Level, AnyPin}, bind_interrupts, peripherals::{PIO0, PIN_11, PIN_12, PIN_16, PIN_17, PIN_25, DMA_CH0},
 };
 use embassy_sync::{blocking_mutex::raw::ThreadModeRawMutex, signal::Signal};
 use embassy_time::Timer;
@@ -191,8 +191,6 @@ pub fn set_rgb(status: RGBStatus, blink: bool) {
 } 
 
 struct Pins([Output<'static, AnyPin>; 3]);
-
-
 
 #[embassy_executor::task]
 pub async fn led_runner(

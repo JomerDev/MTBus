@@ -1,0 +1,8 @@
+{
+    "rust-analyzer.linkedProjects": [
+        ".\\source\\mtbus-shared\\Cargo.toml",
+        ".\\source\\mtbus-shared\\Cargo.toml",
+        ".\\source\\mtbus-shared\\Cargo.toml",
+        ".\\source\\mtbus-translator\\Cargo.toml"
+    ]
+}
