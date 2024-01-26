@@ -1,4 +1,5 @@
 use core::sync::atomic::{AtomicBool, Ordering};
+use cortex_m::asm::bkpt;
 use defmt::global_logger;
 use embassy_sync::{blocking_mutex::raw::RawMutex, pipe::Writer};
 
@@ -54,9 +55,10 @@ where
     let wfn = move |a: SFn| {
         match a {
             SFn::Buf(buf) => {
-                for b in buf {
-                    let _ = writer.try_write(&b.to_ne_bytes());
-                }
+                bkpt();
+                let _ = writer.try_write(buf);
+                // for b in buf {
+                // }
             }
             SFn::Flush => {
             }

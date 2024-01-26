@@ -4,5 +4,6 @@
         ".\\source\\mtbus-shared\\Cargo.toml",
         ".\\source\\mtbus-shared\\Cargo.toml",
         ".\\source\\mtbus-translator\\Cargo.toml"
-    ]
+    ],
+    "cmake.configureOnOpen": false
 }

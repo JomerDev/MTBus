@@ -4,7 +4,8 @@
 use embassy_executor::Spawner;
 use embassy_time::Timer;
 
-use {defmt_rtt as _, panic_probe as _};
+//{defmt_rtt as _, 
+use panic_probe as _;
 use mtbus_shared::led_settings::{led_runner, set_led, LedStatus};
 
 #[embassy_executor::main]

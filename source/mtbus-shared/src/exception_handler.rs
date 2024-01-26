@@ -1,3 +1,4 @@
+use cortex_m::asm::bkpt;
 use cortex_m_rt::{exception, ExceptionFrame};
 use embassy_rp::{gpio::{Level, Output}, Peripherals};
 use embassy_time::{Instant, Duration};
@@ -6,6 +7,7 @@ use embassy_time::{Instant, Duration};
 
 #[exception]
 unsafe fn HardFault(_frame: &ExceptionFrame) -> ! {
+    bkpt();
     let p = unsafe { Peripherals::steal() };
     let mut led1 = Output::new(p.PIN_16, Level::Low);
     let mut led2 = Output::new(p.PIN_17, Level::Low);

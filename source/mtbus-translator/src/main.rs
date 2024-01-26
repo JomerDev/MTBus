@@ -3,11 +3,13 @@
 
 use core::fmt::Write;
 
+use cortex_m::asm::bkpt;
 use embassy_executor::Spawner;
+// use log::info;
 
 use crate::uart_runner::run_uart;
 
-// defmt_rtt as _, 
+// use defmt_rtt as _;
 use panic_probe as _;
 use embassy_rp::{usb::{Driver, InterruptHandler as InterruptHandlerUSB}, peripherals::{USB, UART0}, bind_interrupts, uart::{InterruptHandler as InterruptHandlerUART, self}, gpio::{Output, AnyPin, Level}};
 use embassy_sync::{blocking_mutex::raw::ThreadModeRawMutex, channel::{Channel, Sender, Receiver}, mutex::Mutex};
@@ -71,7 +73,20 @@ impl TgtCfg for Config {
 
 #[embassy_executor::main]
 async fn main(spawner: Spawner) {
+    bkpt();
     let mut p = embassy_rp::init(Default::default());
+
+    // let mut led = Output::new(p.PIN_25, Level::Low);
+
+    // loop {
+        // info!("led on!");
+        // led.set_high();
+        // Timer::after_secs(1).await;
+
+        // // info!("led off!");
+        // led.set_low();
+        // Timer::after_secs(1).await;
+    // }
 
     spawner.spawn(run_uart(p.USB)).unwrap();
     Timer::after_secs(2).await; // Wait two seconds so the usb connection can restart
