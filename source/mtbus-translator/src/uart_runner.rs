@@ -1,4 +1,6 @@
-use embassy_futures::join::join;
+use core::borrow::Borrow;
+
+use embassy_futures::join::{join, join3};
 use embassy_rp::bind_interrupts;
 use embassy_rp::peripherals::USB;
 use embassy_rp::usb::{Driver, InterruptHandler};
@@ -12,7 +14,9 @@ bind_interrupts!(struct Irqs {
     USBCTRL_IRQ => InterruptHandler<USB>;
 });
 
-const MAX_PACKET_SIZE: u8 = 64;
+const MAX_PACKET_SIZE: u8 = 8;
+
+static mut BUFFER: Pipe<CriticalSectionRawMutex, 128> = Pipe::new();
 
 #[embassy_executor::task]
 pub async fn run_uart(usb: USB) {
@@ -54,18 +58,21 @@ pub async fn run_uart(usb: USB) {
     );
 
     // Create classes on the builder.
-    let class = CdcAcmClass::new(&mut builder, &mut state, 64);
+    let class = CdcAcmClass::new(&mut builder, &mut state, MAX_PACKET_SIZE as u16);
     // let class2 = CdcAcmClass::new(&mut builder, &mut state2, 64);
 
     let (mut sender, mut receiver) = class.split();
 
-    let mut buffer: Pipe<CriticalSectionRawMutex, 1024> = Pipe::new();
+    // let buffer: Pipe<CriticalSectionRawMutex, 1024> = Pipe::new();
 
-    let (reader, writer) = buffer.split();
+    let (reader, writer) = unsafe { BUFFER.split() };
 
-    defmt_serial(writer);
+    defmt_serial::<CriticalSectionRawMutex, 128>(writer);
 
+
+    let mut device = builder.build();
     loop {
+        let run_fut = device.run();
         let log_fut = async {
             let mut rx: [u8; MAX_PACKET_SIZE as usize] = [0; MAX_PACKET_SIZE as usize];
             sender.wait_connection().await; 
@@ -84,6 +91,6 @@ pub async fn run_uart(usb: USB) {
                 let _ = receiver.read_packet(&mut discard_buf).await;
             }
         };
-        join(log_fut, discard_fut).await;
+        join3(run_fut, log_fut, discard_fut).await;
     }
 }

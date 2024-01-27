@@ -73,7 +73,7 @@ impl TgtCfg for Config {
 
 #[embassy_executor::main]
 async fn main(spawner: Spawner) {
-    bkpt();
+    // bkpt();
     let mut p = embassy_rp::init(Default::default());
 
     // let mut led = Output::new(p.PIN_25, Level::Low);
@@ -97,7 +97,7 @@ async fn main(spawner: Spawner) {
 
     set_led(LedStatus::Red, true);
 
-    defmt::info!("Startup");
+    defmt::info!("\nStartup\n");
 
     let unique = erdnuss_rp2040::get_unique_id(&mut p.FLASH).unwrap();
     defmt::info!("MAC: {=u64:08X}", unique);
@@ -149,18 +149,19 @@ async fn chatty(unique: u64, outie: OutieRef) {
     // use usb_icd::rs485::Log;
 
     let mut strbuf = String::<128>::new();
-    let mut tick = Ticker::every(Duration::from_secs(3));
+    let mut tick = Ticker::every(Duration::from_secs(1));
     let mut seq: u32 = 0;
-    write!(&mut strbuf, "Device {unique:016X} says hello!").ok();
+    write!(&mut strbuf, "Device {unique:016X} says hello 2!").ok();
 
     loop {
         tick.next().await;
-        let mut out = outie.lock().await;
-        let msg = out.alloc_buf().await;
+        // let mut out = outie.lock().await;
+        // let msg = out.alloc_buf().await;
         // let Some(msg) = send_topic::<Log>(buf, seq, &strbuf) else {
         //     continue;
         // };
-        out.tx.send(msg).await;
+        // out.tx.send(msg).await;
         seq = seq.wrapping_add(1);
+        defmt::info!("{}", strbuf);
     }
 }

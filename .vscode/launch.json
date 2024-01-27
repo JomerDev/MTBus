@@ -77,7 +77,12 @@
             }
         ],
         "consoleLogLevel": "Info", //Error, Warn, Info, Debug, Trace
-        "wireProtocol": "Swd"
+        "wireProtocol": "Swd",
+        "env": {
+          //!MODIFY (or remove)
+          // If you set this variable, check the VSCode console log window for the location of the log file.
+          "RUST_LOG": "info"
+        },
     }
     ]
   }
