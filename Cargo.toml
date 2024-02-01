@@ -7,14 +7,15 @@ members = [
 ]
 
 [patch.crates-io]
-embassy-usb-logger = { git = "https://github.com/embassy-rs/embassy", rev = "20fd03a14f1261e7b2264dcbca8e164393e66b94" }
-embassy-usb = { git = "https://github.com/embassy-rs/embassy", rev = "20fd03a14f1261e7b2264dcbca8e164393e66b94" }
-embassy-sync = { git = "https://github.com/embassy-rs/embassy", rev = "20fd03a14f1261e7b2264dcbca8e164393e66b94" }
-embassy-executor = { git = "https://github.com/embassy-rs/embassy", rev = "20fd03a14f1261e7b2264dcbca8e164393e66b94" }
-embassy-time-driver = { git = "https://github.com/embassy-rs/embassy", rev = "20fd03a14f1261e7b2264dcbca8e164393e66b94" }
-embassy-time = { git = "https://github.com/embassy-rs/embassy", rev = "20fd03a14f1261e7b2264dcbca8e164393e66b94" }
-embassy-rp = { git = "https://github.com/embassy-rs/embassy", rev = "20fd03a14f1261e7b2264dcbca8e164393e66b94" }
-erdnuss-comms = { git = "https://github.com/JomerDev/erdnuss-pub", rev = "a8cb22b62b3fe543618517e7efd94c0dc6f9367a" }
+embassy-usb-logger = { git = "https://github.com/embassy-rs/embassy", rev = "3cd0a54e0e3e7dd4b480034106b8b24144d2385b" }
+embassy-usb = { git = "https://github.com/embassy-rs/embassy", rev = "3cd0a54e0e3e7dd4b480034106b8b24144d2385b" }
+embassy-sync = { git = "https://github.com/embassy-rs/embassy", rev = "3cd0a54e0e3e7dd4b480034106b8b24144d2385b" }
+embassy-executor = { git = "https://github.com/embassy-rs/embassy", rev = "3cd0a54e0e3e7dd4b480034106b8b24144d2385b" }
+embassy-time-driver = { git = "https://github.com/embassy-rs/embassy", rev = "3cd0a54e0e3e7dd4b480034106b8b24144d2385b" }
+embassy-time = { git = "https://github.com/embassy-rs/embassy", rev = "3cd0a54e0e3e7dd4b480034106b8b24144d2385b" }
+embassy-rp = { git = "https://github.com/embassy-rs/embassy", rev = "3cd0a54e0e3e7dd4b480034106b8b24144d2385b" }
+cyw43-pio = { git = "https://github.com/embassy-rs/embassy", rev = "3cd0a54e0e3e7dd4b480034106b8b24144d2385b" }
+# erdnuss-comms = { path = "../erdnuss-pub"}
 
 
 # [package]
@@ -30,7 +31,7 @@ debug = 2
 debug-assertions = true
 incremental = false
 opt-level = 0
-overflow-checks = true
+overflow-checks = false
 
 # cargo build/run --release
 [profile.release]

@@ -6,7 +6,7 @@ use embassy_rp::{
         Common, Config, FifoJoin, Instance, PioPin, ShiftConfig, ShiftDirection,
         StateMachine, Pio, InterruptHandler,
     },
-    Peripheral, PeripheralRef, gpio::{Output, Level, AnyPin}, bind_interrupts, peripherals::{PIO0, PIN_11, PIN_12, PIN_16, PIN_17, PIN_25, DMA_CH0},
+    Peripheral, PeripheralRef, gpio::{Output, Level, AnyPin}, bind_interrupts, peripherals::{DMA_CH0, DMA_CH2, PIN_11, PIN_12, PIN_16, PIN_17, PIN_25, PIO0},
 };
 use embassy_sync::{blocking_mutex::raw::ThreadModeRawMutex, signal::Signal};
 use embassy_time::Timer;
@@ -135,7 +135,8 @@ pub enum LedStatus {
     Off,
     Red,
     Green,
-    Blue
+    Blue,
+    Yellow,
 }
 
 impl LedStatus {
@@ -145,6 +146,7 @@ impl LedStatus {
             LedStatus::Red => [true, false, false],
             LedStatus::Green => [false, true, false],
             LedStatus::Blue => [false, false, true],
+            LedStatus::Yellow => [true, true, false],
         }
     }
 }
@@ -190,7 +192,7 @@ pub fn set_rgb(status: RGBStatus, blink: bool) {
     });
 } 
 
-struct Pins([Output<'static, AnyPin>; 3]);
+struct Pins([Output<'static>; 3]);
 
 #[embassy_executor::task]
 pub async fn led_runner(
@@ -200,7 +202,7 @@ pub async fn led_runner(
     p17: PIN_17,
     p25: PIN_25,
     pio0: PIO0,
-    dma_ch0: DMA_CH0,
+    dma_ch0: DMA_CH2,
 ) {
 
     let _pow = Output::new(p11, Level::High);

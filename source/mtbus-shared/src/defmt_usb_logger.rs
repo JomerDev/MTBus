@@ -9,7 +9,7 @@ static mut CS_RESTORE: critical_section::RestoreState = critical_section::Restor
 
 /// All of this nonsense is to try and erase the Error type of the `embedded_hal::serial::nb::Write` implementor.
 // type WriterStore = Writer<'static, CriticalSectionRawMutex, 1024>;
-static mut WRITEFN: Option<Writer<CriticalSectionRawMutex, 128>> = None;
+static mut WRITEFN: Option<Writer<CriticalSectionRawMutex, 1024>> = None;
 
 enum SFn<'a> {
     Buf(&'a [u8]),
@@ -46,7 +46,7 @@ enum SFn<'a> {
 /// The peripheral should implement the [`embedded_hal::blocking::serial::Write`] trait. If your HAL
 /// already has the non-blocking [`Write`](embedded_hal::serial::Write) implemented, it can opt-in
 /// to the [default implementation](embedded_hal::blocking::serial::write::Default).
-pub fn defmt_serial<'p, M, const N: usize>(writer: Writer<'static, CriticalSectionRawMutex, 128>)
+pub fn defmt_serial<'p, M, const N: usize>(writer: Writer<'static, CriticalSectionRawMutex, 1024>)
 where
     M: RawMutex,
 {

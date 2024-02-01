@@ -3,7 +3,6 @@
 
 use core::fmt::Write;
 
-use cortex_m::asm::bkpt;
 use embassy_executor::Spawner;
 // use log::info;
 
@@ -25,7 +24,6 @@ use heapless::String;
 mod uart_runner;
 
 bind_interrupts!(struct Irqs {
-    // USBCTRL_IRQ => InterruptHandlerUSB<USB>;
     UART0_IRQ => InterruptHandlerUART<UART0>;
 });
 
@@ -61,57 +59,48 @@ impl TgtCfg for Config {
     type Mutex = ThreadModeRawMutex;
     type Serial = Rs485Uart<UART0>;
     type Rand = ChaCha8Rng;
-    const ADDRESS_CLAIM_TIMEOUT: Duration = Duration::from_millis(10);
-    const TURNAROUND_DELAY: Duration = Duration::from_millis(0);
-    const SELECT_TIMEOUT: Duration = Duration::from_millis(10);
+    const ADDRESS_CLAIM_TIMEOUT: Duration = Duration::from_secs(3);
+    const TURNAROUND_DELAY: Duration = Duration::from_micros(5);
+    const SELECT_TIMEOUT: Duration = Duration::from_secs(3);
 }
-
-// #[embassy_executor::task]
-// async fn logger_task(driver: Driver<'static, USB>) {
-//     embassy_usb_logger::run!(1024, log::LevelFilter::Info, driver);
-// }
 
 #[embassy_executor::main]
 async fn main(spawner: Spawner) {
-    // bkpt();
     let mut p = embassy_rp::init(Default::default());
 
-    // let mut led = Output::new(p.PIN_25, Level::Low);
-
-    // loop {
-        // info!("led on!");
-        // led.set_high();
-        // Timer::after_secs(1).await;
-
-        // // info!("led off!");
-        // led.set_low();
-        // Timer::after_secs(1).await;
-    // }
-
     spawner.spawn(run_uart(p.USB)).unwrap();
-    Timer::after_secs(2).await; // Wait two seconds so the usb connection can restart
+    Timer::after_secs(8).await; // Wait two seconds so the usb connection can restart
 
     let _ = spawner.spawn(led_runner(
-        p.PIN_11, p.PIN_12, p.PIN_16, p.PIN_17, p.PIN_25, p.PIO0, p.DMA_CH0,
+        p.PIN_11, p.PIN_12, p.PIN_16, p.PIN_17, p.PIN_25, p.PIO0, p.DMA_CH2,
     ));
 
     set_led(LedStatus::Red, true);
 
-    defmt::info!("\nStartup\n");
+    defmt::info!("Startup\n\n");
 
     let unique = erdnuss_rp2040::get_unique_id(&mut p.FLASH).unwrap();
+    // defmt::info!("MAC: {0=0..7:02X}:{0=8..15:02X}:{0=16..23:02X}:{0=24..31:02X}:{0=32..39:02X}:{0=40..47:02X}:{0=48..55:02X}:{0=56..63:02X}", unique);
     defmt::info!("MAC: {=u64:08X}", unique);
 
     let mut config = uart::Config::default();
-    config.baudrate = 7812500;
+    config.baudrate = 7_812_500;
+    // config.baudrate = 115200;
+    
+    // Pico:
+    // let uart = uart::Uart::new(
+    //     p.UART0, p.PIN_16, p.PIN_17, Irqs, p.DMA_CH0, p.DMA_CH1, config,
+    // );
+
+    // let io_pin1 = Output::new(AnyPin::from(p.PIN_15), Level::Low);
+
+    // xiao-rp2040:
     let uart = uart::Uart::new(
-        p.UART0, p.PIN_0, p.PIN_1, Irqs, p.DMA_CH1, p.DMA_CH2, config,
+        p.UART0, p.PIN_0, p.PIN_1, Irqs, p.DMA_CH0, p.DMA_CH1, config,
     );
 
-    let io_pin1 = Output::new(AnyPin::from(p.PIN_4), Level::Low);
+    let io_pin1 = Output::new(AnyPin::from(p.PIN_29), Level::Low);
     let rs485 = Rs485Uart::new(uart, io_pin1);
-
-    defmt::info!("Here we go!");
 
     let mut whole_pool = unsafe { RawFrameSlice::from_static(&POOL) };
     let app_pool = whole_pool.split(8).unwrap();
@@ -125,43 +114,25 @@ async fn main(spawner: Spawner) {
         get_rand(unique),
     );
 
-    let outie_ref = OUTIE.init(Mutex::new(Outie {
-        tx: OUTGOING.sender(),
-        opool: whole_pool,
-    }));
+    // let outie_ref = OUTIE.init(Mutex::new(Outie {
+    //     tx: OUTGOING.sender(),
+    //     opool: whole_pool,
+    // }));
 
     spawner.must_spawn(run_sub(sub));
-    spawner.must_spawn(chatty(unique, outie_ref));
 
-    defmt::info!("Running!");
-    // set_led(LedStatus::Blue, true);
+    let fut = async {
+        loop {
+            Timer::after_secs(10).await;
+            defmt::info!("I'm alive!");
+        }
+    };
+
+    fut.await;
 
 }
 
 #[embassy_executor::task]
 async fn run_sub(mut sub: erdnuss_comms::target::Target<'static, Config, 8>) {
     sub.run().await;
-}
-
-
-#[embassy_executor::task]
-async fn chatty(unique: u64, outie: OutieRef) {
-    // use usb_icd::rs485::Log;
-
-    let mut strbuf = String::<128>::new();
-    let mut tick = Ticker::every(Duration::from_secs(1));
-    let mut seq: u32 = 0;
-    write!(&mut strbuf, "Device {unique:016X} says hello 2!").ok();
-
-    loop {
-        tick.next().await;
-        // let mut out = outie.lock().await;
-        // let msg = out.alloc_buf().await;
-        // let Some(msg) = send_topic::<Log>(buf, seq, &strbuf) else {
-        //     continue;
-        // };
-        // out.tx.send(msg).await;
-        seq = seq.wrapping_add(1);
-        defmt::info!("{}", strbuf);
-    }
 }

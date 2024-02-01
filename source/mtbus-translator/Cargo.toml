@@ -39,13 +39,14 @@ cyw43-pio = { version = "0.1.0", features = ["defmt", "overclock"] }
 static_cell = { version = "2"}
 
 mtbus-shared = { path = "../mtbus-shared" }
-erdnuss-comms = { git = "https://github.com/JomerDev/erdnuss-pub", branch = "small-fixes", features = [ "defmt-logging" ] }
+# erdnuss-comms = { git = "https://github.com/JomerDev/erdnuss-pub", branch = "small-fixes", features = [ "defmt-logging" ] }
+erdnuss-comms = { path = "../../../erdnuss-pub/source/comms", features = [ "defmt-logging" ] }
+erdnuss-rp2040 = { path = "../../../erdnuss-pub/source/rp2040" }
 
-erdnuss-rp2040 = { git = "https://github.com/JomerDev/erdnuss-pub", branch = "small-fixes" }
+# erdnuss-rp2040 = { git = "https://github.com/JomerDev/erdnuss-pub", branch = "small-fixes" }
 grounded = "0.2.0"
 rand_chacha = { version = "0.3.1", default-features = false }
 heapless = "0.8.0"
-# defmt-serial = "0.7.0"
 embassy-usb = { version = "0.1.0", features = ["defmt"] }
 
 # [patch.crates-io]
