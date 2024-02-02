@@ -6,7 +6,7 @@ use embassy_rp::{bind_interrupts, gpio::{AnyPin, Level, Output}, peripherals::UA
 use embassy_sync::blocking_mutex::raw::ThreadModeRawMutex;
 use embassy_time::{Duration, Instant, Ticker, Timer};
 
-use erdnuss_comms::{frame_pool::{FrameStorage, RawFrameSlice}, Controller, LastChange, MAX_TARGETS};
+use erdnuss_comms::{frame_pool::{FrameStorage, RawFrameSlice}, Controller, MAX_TARGETS};
 use erdnuss_rp2040::{get_rand, Rs485Uart};
 use heapless::Vec;
 use panic_probe as _;
@@ -63,11 +63,7 @@ async fn control(unique: u64, mut rs485: Rs485Uart<UART0>, mut rfs: RawFrameSlic
 
     let dom = &CON;
 
-    let mut known_macs: heapless::Vec<u64, {MAX_TARGETS}> = heapless::Vec::new();
-    let _ = known_macs.push(0x4250304638313305);
-
     dom.init(&mut rfs).await;
-    dom.add_known_macs(known_macs).await;
     let mut rand = get_rand(unique);
     let mut buf = [0u8; 256];
     // let mut last_routing = Instant::now();
@@ -77,14 +73,14 @@ async fn control(unique: u64, mut rs485: Rs485Uart<UART0>, mut rfs: RawFrameSlic
         // defmt::info!("Dom step");
         tick.next().await;
         if let Ok(changes) = dom.step(&mut rs485, &mut rand).await {
-            for change in changes {
-                match change {
-                    LastChange::Active(mac) => defmt::info!("Connected: {=u64:08X}", mac),
-                    LastChange::Disconnected(mac) => defmt::info!("Disconnected: {=u64:08X}", mac),
-                    LastChange::Known(mac) => defmt::info!("Known: {=u64:08X}", mac),
-                    LastChange::Pending(mac) => defmt::info!("Pending: {=u64:08X}", mac),
-                }
-            }
+            // for change in changes {
+            //     match change {
+            //         LastChange::Active(mac) => defmt::info!("Connected: {=u64:08X}", mac),
+            //         LastChange::Disconnected(mac) => defmt::info!("Disconnected: {=u64:08X}", mac),
+            //         LastChange::Known(mac) => defmt::info!("Known: {=u64:08X}", mac),
+            //         LastChange::Pending(mac) => defmt::info!("Pending: {=u64:08X}", mac),
+            //     }
+            // }
         } else {
             defmt::error!("Dom step err :(");
         };

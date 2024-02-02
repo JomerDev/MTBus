@@ -13,7 +13,7 @@ use panic_probe as _;
 use embassy_rp::{usb::{Driver, InterruptHandler as InterruptHandlerUSB}, peripherals::{USB, UART0}, bind_interrupts, uart::{InterruptHandler as InterruptHandlerUART, self}, gpio::{Output, AnyPin, Level}};
 use embassy_sync::{blocking_mutex::raw::ThreadModeRawMutex, channel::{Channel, Sender, Receiver}, mutex::Mutex};
 use embassy_time::{Timer, Duration, Ticker};
-use erdnuss_comms::{target::TgtCfg, frame_pool::{ FrameBox, RawFrame, RawFrameSlice }};
+use erdnuss_comms::{target::TgtCfg, frame_pool::{ FrameBox, FrameStorage, RawFrameSlice }};
 use erdnuss_rp2040::{Rs485Uart, get_rand};
 use mtbus_shared::led_settings::{led_runner, set_led, LedStatus};
 use grounded::uninit::GroundedArrayCell;
@@ -27,7 +27,7 @@ bind_interrupts!(struct Irqs {
     UART0_IRQ => InterruptHandlerUART<UART0>;
 });
 
-static POOL: GroundedArrayCell<RawFrame, 16> = GroundedArrayCell::const_init();
+static POOL: FrameStorage<16> = FrameStorage::new();
 static OUTGOING: Channel<ThreadModeRawMutex, FrameBox, 8> = Channel::new();
 static INCOMING: Channel<ThreadModeRawMutex, FrameBox, 8> = Channel::new();
 
@@ -102,7 +102,7 @@ async fn main(spawner: Spawner) {
     let io_pin1 = Output::new(AnyPin::from(p.PIN_29), Level::Low);
     let rs485 = Rs485Uart::new(uart, io_pin1);
 
-    let mut whole_pool = unsafe { RawFrameSlice::from_static(&POOL) };
+    let mut whole_pool = POOL.take().unwrap();
     let app_pool = whole_pool.split(8).unwrap();
 
     let sub: erdnuss_comms::target::Target<'_, Config, 8> = erdnuss_comms::target::Target::new(
